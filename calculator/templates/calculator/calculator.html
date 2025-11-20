@@ -1,0 +1,472 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sage Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Body + background */
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url("{% static 'calculator/background-desktop.svg' %}") no-repeat center center;
+    background-size: cover;
+}
+
+@media (max-width: 768px) {
+    body {
+        background: url("{% static 'calculator/background-mobile.svg' %}") no-repeat center center;
+        background-size: contain;  /* change cover → contain */
+    }
+}
+
+/* Calculator container */
+.calc-container, .calc-container * {
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.calc-container {
+    width: 400px;
+    max-height: 530px;
+    height: auto;
+    border-radius: 22px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    max-width: 95%;
+    overflow: visible;     
+    position: relative;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .calc-container {
+        width: 90%;           /* shrink container */
+        max-width: 360px;
+        padding: 12px;
+        border-radius: 18px;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 400px) {
+    .calc-container {
+        width: 95%;
+        max-width: 320px;
+        padding: 10px;
+        border-radius: 16px;
+    }
+}
+
+/* Title */
+.title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fcfcfc;
+    margin-bottom: 8px;
+}
+
+/* Scrollable content */
+.content {
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    padding: 4px 6px;
+    margin-bottom: 12px;
+    overflow-x: visible;
+    position: relative;
+}
+
+/* Rows */
+.row {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    gap: 8px;
+    position: relative;
+    transform: translateX(-3px); 
+    flex-shrink: 0; /* prevent shrinking */
+}
+
+/* Price box */
+.price-box {
+    width: 100px;
+    min-width: 40px;
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid black;
+    background: white;
+    flex-shrink: 0; /* fixed width */
+    cursor: pointer;
+    padding: 0 10px;
+    position: relative;
+}
+
+.price-box::after {
+    content: "▼";
+    font-weight: bold;
+    font-size: 12px;
+    margin-left: 4px;
+    transition: transform 0.2s;
+}
+
+.price-box.active::after {
+    transform: rotate(-90deg);
+}
+
+/* Drop panel */
+.drop-panel {
+    position: absolute;
+    left: 0;
+    top: 48px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: none;
+    z-index: 999999;
+    grid-template-columns: repeat(3, 1fr); /* 3 per row */
+    gap: 6px;
+    width: auto;
+    max-width: 350px;
+}
+
+/* Predefined buttons */
+.predef-btn {
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+    text-align: center;
+}
+
+.predef-btn:hover { background: #e6e6e6; }
+.predef-btn.selected { background: var(--ocean); color: white; }
+
+/* Quantity input */
+.qty-input {
+    flex: 0 0 40px;
+    width: 190px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid black;
+    padding: 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    flex-shrink: 0; /* prevent shrinking */
+}
+
+/* Tick */
+.tick {
+    width: 120px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    background: white;
+    color: rgb(227, 223, 223);
+    transition: color 0.18s;
+}
+.tick:not(.locked):hover { background: #f0f0f0; }
+.tick.active { color: green; }
+.tick.locked { pointer-events: none; color: green; }
+
+/* Total box */
+.total {
+    width: 99.5%;
+    box-sizing: border-box;
+    background: white;
+    padding: 8px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 4px;
+}
+
+.total-inner {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    max-width: 380px;
+}
+
+.total-label {
+    width: 80px;
+    height: 45px;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 0 10px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    background: white;
+    outline: none;
+    pointer-events: none;
+    margin-left: -4px; /* slightly left */
+}
+
+.total-amount {
+    flex: 1;
+    height: 45px;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 0 10px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: right;
+    background: white;
+    outline: none;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+}
+
+/* Reset button */
+.reset-btn {
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: 0.15s ease-in-out;
+}
+.reset-btn:hover { transform: scale(1.12); color: black; }
+
+</style>
+</head>
+<body>
+
+<div class="calc-container">
+    <div class="title">CALCULATOR</div>
+
+    <div class="content" id="list">
+        <!-- rows are rendered here -->
+    </div>
+
+    <div class="total">
+        <div class="total-inner">
+            <input type="text" class="total-label" readonly value="TOTAL">
+            <input type="text" class="total-amount" readonly value="0.00">
+        </div>
+    </div>
+
+    <!-- Only one controls div, inside the container -->
+    <div class="controls">
+        <button class="reset-btn" onclick="resetAll()">⟳</button>
+    </div>
+</div>
+
+
+<script>
+/* DATA */
+const predefined = [
+    5, 10, 20, 30, 50, 100, 200, 500, 1000, 5000,
+    [5, 10], [10, 20], [20, 30], [30, 50],[50,100],[100,200],
+    [200,500],[500,1000],[1000,5000],
+];
+
+let completed = [];
+
+const list = document.getElementById('list');
+const totalValue = document.getElementById('totalValue');
+
+function formatPriceDisplay(price) {
+    return Array.isArray(price) ? `(${price.join(',')})` : price;
+}
+
+function createRow(data = null, defaultPrice = null) {
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    // PRICE BOX (clickable for dropdown)
+    const priceBox = document.createElement('div');
+    priceBox.className = 'price-box';
+    priceBox.textContent = data ? formatPriceDisplay(data.price) : '';
+    
+    // QTY INPUT
+    const qty = document.createElement('input');
+    qty.className = 'qty-input';
+    qty.type = 'number';
+    qty.min = '0';
+    qty.inputMode = 'numeric';
+
+    // TICK
+    const tick = document.createElement('div');
+    tick.className = 'tick';
+    tick.textContent = '✓';
+
+    // DROPDOWN PANEL
+    const panel = document.createElement('div');
+    panel.className = 'drop-panel';
+
+    predefined.forEach(v => {
+        const btn = document.createElement('div');
+        btn.className = 'predef-btn';
+        btn.textContent = Array.isArray(v) ? `(${v.join(',')})` : v;
+
+        btn.addEventListener('click', () => {
+            row._price = v;
+            priceBox.textContent = Array.isArray(v) ? `(${v.join(',')})` : v;
+            panel.style.display = 'none';
+            priceBox.classList.remove('active');
+        });
+
+        panel.appendChild(btn);
+    });
+
+    priceBox.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const visible = panel.style.display === 'grid'; // check if already visible
+
+    // Hide all other dropdowns
+    document.querySelectorAll('.drop-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.price-box').forEach(b => b.classList.remove('active'));
+
+    if (!visible) {
+        panel.style.display = 'grid';   // show with grid layout
+        priceBox.classList.add('active');
+
+        const rect = priceBox.getBoundingClientRect();
+        panel.style.left = rect.left + "px";
+        panel.style.top = rect.bottom + 4 + "px";
+    } else {
+        panel.style.display = 'none';
+        priceBox.classList.remove('active');
+    }
+});
+
+    // QTY INPUT LOGIC
+qty.addEventListener('input', () => {
+    const value = parseInt(qty.value) || 0;
+    if (value > 0 && row._price !== undefined) tick.classList.add('active');
+    else tick.classList.remove('active');
+});
+
+// TICK LOGIC
+tick.addEventListener('click', () => {
+    const q = parseInt(qty.value) || 0;
+    if (q <= 0 || row._price === undefined) return;
+
+    const unitPrice = Array.isArray(row._price)
+        ? row._price.reduce((a, b) => a + b, 0)
+        : row._price;
+
+    const subtotal = unitPrice * q;
+
+    qty.disabled = true;
+    tick.classList.add('locked');    // lock the tick mark
+    tick.classList.remove('active'); // remove temporary active state if any
+    priceBox.style.pointerEvents = 'none';
+    panel.style.display = 'none';
+
+    completed.push({ q, price: row._price, subtotal });
+
+    updateTotal();
+    appendEditableRow();
+});
+
+    // ATTACH PANEL TO BODY
+    document.body.appendChild(panel);
+
+    // HANDLE PRESELECTED DATA
+    if (data) {
+        row._price = data.price;
+        priceBox.textContent = formatPriceDisplay(data.price);
+        qty.value = data.q;
+        qty.disabled = true;
+        tick.classList.add('locked', 'active');
+        priceBox.style.pointerEvents = 'none';
+    }
+
+    // HANDLE DEFAULT PRICE FOR FIRST ROW
+    if (defaultPrice && !data) {
+        row._price = defaultPrice;
+        priceBox.textContent = formatPriceDisplay(defaultPrice);
+    }
+
+    row.appendChild(priceBox);
+    row.appendChild(qty);
+    row.appendChild(tick);
+
+    return row;
+}
+
+function appendEditableRow(defaultPrice = null) {
+    const r = createRow(null, defaultPrice);
+    list.appendChild(r);
+}
+
+function initUI() {
+    completed = [];
+    list.innerHTML = '';
+    appendEditableRow(predefined[0]); // First row default price
+    updateTotal();
+}
+
+function updateTotal() {
+    const sum = completed.reduce((a, b) => a + b.subtotal, 0).toFixed(2);
+
+    const totalBox = document.querySelector('.total-amount');
+    if (totalBox) totalBox.value = sum;
+}
+
+
+function resetAll() {
+    completed = [];
+    initUI();
+}
+
+// CLOSE DROPDOWNS ON OUTSIDE CLICK
+document.addEventListener('click', () => {
+    document.querySelectorAll('.drop-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.price-box').forEach(b => b.classList.remove('active'));
+});
+
+// INITIALIZE
+initUI();
+</script>
+
+</body>
+</html>
