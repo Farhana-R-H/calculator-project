@@ -4,10 +4,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Sage Calculator</title>
+<title>Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* Body + background */
+
 body {
     font-family: 'Inter', Arial, sans-serif;
     margin: 0;
@@ -15,19 +15,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100dvh;
     background: url("{% static 'calculator/background-desktop.svg' %}") no-repeat center center;
     background-size: cover;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body {
         background: url("{% static 'calculator/background-mobile.svg' %}") no-repeat center center;
-        background-size: contain;  /* change cover → contain */
+        background-size: cover;  
     }
 }
 
-/* Calculator container */
+
 .calc-container, .calc-container * {
     font-family: 'Inter', Arial, sans-serif;
 }
@@ -45,31 +45,38 @@ body {
     border: 1px solid rgba(255,255,255,0.3);
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     max-width: 95%;
-    overflow: visible;     
+    overflow: visible;
     position: relative;
 }
 
-/* Mobile adjustments */
 @media (max-width: 768px) {
     .calc-container {
-        width: 90%;           /* shrink container */
-        max-width: 360px;
+        width: 90%;
+        max-width: 310px;
         padding: 12px;
         border-radius: 18px;
         overflow: visible;
+
+        display: flex;             
+        flex-direction: column;
+        justify-content: center;   
     }
 }
-
 @media (max-width: 400px) {
     .calc-container {
         width: 95%;
-        max-width: 320px;
+        max-width: 280px;
         padding: 10px;
         border-radius: 16px;
+
+        display: flex;             
+        flex-direction: column;
+        justify-content: center;   
     }
 }
 
-/* Title */
+
+
 .title {
     text-align: center;
     font-size: 20px;
@@ -78,7 +85,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* Scrollable content */
+
 .content {
     flex: 1;
     width: 100%;
@@ -89,7 +96,7 @@ body {
     position: relative;
 }
 
-/* Rows */
+
 .row {
     display: flex;
     align-items: center;
@@ -99,11 +106,54 @@ body {
     margin-bottom: 8px;
     gap: 8px;
     position: relative;
-    transform: translateX(-3px); 
-    flex-shrink: 0; /* prevent shrinking */
+    transform: translateX(-3px);
+    flex-shrink: 0; 
 }
 
-/* Price box */
+@media (max-width: 768px) {
+
+    .row {
+        width: 92%;         
+        max-width: 290px;    
+        margin: 0 auto;     
+        transform: translateX(-5px);
+        gap: 3px;
+        overflow: hidden;
+         justify-content: space-between;
+    }
+
+    
+    .price-box {
+        flex: 0 0 32%;       
+        max-width: 32%;
+        min-width: 80px;     
+    }
+
+    
+    .qty-input {
+        flex: 1;              
+        max-width: 70%;
+        min-width: 80px;
+    }
+
+   
+    .tick {
+        flex: 0 0 18%;        
+        max-width: 18%;
+        min-width: 40px;
+    }
+
+    
+    .tick input[type="checkbox"] {
+        transform: scale(0.8);
+    }
+}
+
+
+
+
+
+
 .price-box {
     width: 100px;
     min-width: 40px;
@@ -134,7 +184,7 @@ body {
     transform: rotate(-90deg);
 }
 
-/* Drop panel */
+
 .drop-panel {
     position: absolute;
     left: 0;
@@ -146,13 +196,13 @@ body {
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     display: none;
     z-index: 999999;
-    grid-template-columns: repeat(3, 1fr); /* 3 per row */
+    grid-template-columns: repeat(3, 1fr); 
     gap: 6px;
     width: auto;
     max-width: 350px;
 }
 
-/* Predefined buttons */
+
 .predef-btn {
     padding: 4px 6px;
     border-radius: 6px;
@@ -166,7 +216,7 @@ body {
 .predef-btn:hover { background: #e6e6e6; }
 .predef-btn.selected { background: var(--ocean); color: white; }
 
-/* Quantity input */
+
 .qty-input {
     flex: 0 0 40px;
     width: 190px;
@@ -178,10 +228,10 @@ body {
     font-weight: 600;
     text-align: center;
     outline: none;
-    flex-shrink: 0; /* prevent shrinking */
+    flex-shrink: 0; 
 }
 
-/* Tick */
+
 .tick {
     width: 120px;
     height: 45px;
@@ -201,7 +251,7 @@ body {
 .tick.active { color: green; }
 .tick.locked { pointer-events: none; color: green; }
 
-/* Total box */
+
 .total {
     width: 99.5%;
     box-sizing: border-box;
@@ -249,14 +299,41 @@ body {
     outline: none;
 }
 
-/* Controls */
+@media (max-width: 480px) {
+    .total {
+        width: 96%;
+        max-width: 300px;
+        margin: 0 auto;
+        padding-left: 15px;   
+        padding-right: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .total-inner {
+        width: 100%;
+        gap: 6px;
+    }
+
+    .total-label,
+    .total-amount {
+        flex: 1;
+        min-width: 0;
+        height: 42px;
+        padding: 0 8px;
+        box-sizing: border-box;
+    }
+}
+
+
 .controls {
     display: flex;
     justify-content: flex-end;
     margin-top: auto;
 }
 
-/* Reset button */
+
 .reset-btn {
     width: 44px;
     height: 44px;
@@ -282,7 +359,7 @@ body {
     <div class="title">CALCULATOR</div>
 
     <div class="content" id="list">
-        <!-- rows are rendered here -->
+        
     </div>
 
     <div class="total">
@@ -292,7 +369,7 @@ body {
         </div>
     </div>
 
-    <!-- Only one controls div, inside the container -->
+   
     <div class="controls">
         <button class="reset-btn" onclick="resetAll()">⟳</button>
     </div>
@@ -300,11 +377,11 @@ body {
 
 
 <script>
-/* DATA */
+
 const predefined = [
-    5, 10, 20, 30, 50, 100, 200, 500, 1000, 5000,
+    5, 10, 20, 30, 50, 100, 200, 500, 1000, 2000,5000,
     [5, 10], [10, 20], [20, 30], [30, 50],[50,100],[100,200],
-    [200,500],[500,1000],[1000,5000],
+    [200,500],
 ];
 
 let completed = [];
@@ -320,24 +397,24 @@ function createRow(data = null, defaultPrice = null) {
     const row = document.createElement('div');
     row.className = 'row';
 
-    // PRICE BOX (clickable for dropdown)
+   
     const priceBox = document.createElement('div');
     priceBox.className = 'price-box';
     priceBox.textContent = data ? formatPriceDisplay(data.price) : '';
-    
-    // QTY INPUT
+
+   
     const qty = document.createElement('input');
     qty.className = 'qty-input';
     qty.type = 'number';
     qty.min = '0';
     qty.inputMode = 'numeric';
 
-    // TICK
+   
     const tick = document.createElement('div');
     tick.className = 'tick';
     tick.textContent = '✓';
 
-    // DROPDOWN PANEL
+   
     const panel = document.createElement('div');
     panel.className = 'drop-panel';
 
@@ -358,14 +435,14 @@ function createRow(data = null, defaultPrice = null) {
 
     priceBox.addEventListener('click', (e) => {
     e.stopPropagation();
-    const visible = panel.style.display === 'grid'; // check if already visible
+    const visible = panel.style.display === 'grid'; 
 
-    // Hide all other dropdowns
+    
     document.querySelectorAll('.drop-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.price-box').forEach(b => b.classList.remove('active'));
 
     if (!visible) {
-        panel.style.display = 'grid';   // show with grid layout
+        panel.style.display = 'grid';   
         priceBox.classList.add('active');
 
         const rect = priceBox.getBoundingClientRect();
@@ -377,14 +454,14 @@ function createRow(data = null, defaultPrice = null) {
     }
 });
 
-    // QTY INPUT LOGIC
+   
 qty.addEventListener('input', () => {
     const value = parseInt(qty.value) || 0;
     if (value > 0 && row._price !== undefined) tick.classList.add('active');
     else tick.classList.remove('active');
 });
 
-// TICK LOGIC
+
 tick.addEventListener('click', () => {
     const q = parseInt(qty.value) || 0;
     if (q <= 0 || row._price === undefined) return;
@@ -396,8 +473,8 @@ tick.addEventListener('click', () => {
     const subtotal = unitPrice * q;
 
     qty.disabled = true;
-    tick.classList.add('locked');    // lock the tick mark
-    tick.classList.remove('active'); // remove temporary active state if any
+    tick.classList.add('locked');    
+    tick.classList.remove('active'); 
     priceBox.style.pointerEvents = 'none';
     panel.style.display = 'none';
 
@@ -407,10 +484,10 @@ tick.addEventListener('click', () => {
     appendEditableRow();
 });
 
-    // ATTACH PANEL TO BODY
+    
     document.body.appendChild(panel);
 
-    // HANDLE PRESELECTED DATA
+    
     if (data) {
         row._price = data.price;
         priceBox.textContent = formatPriceDisplay(data.price);
@@ -420,7 +497,7 @@ tick.addEventListener('click', () => {
         priceBox.style.pointerEvents = 'none';
     }
 
-    // HANDLE DEFAULT PRICE FOR FIRST ROW
+  
     if (defaultPrice && !data) {
         row._price = defaultPrice;
         priceBox.textContent = formatPriceDisplay(defaultPrice);
@@ -436,12 +513,22 @@ tick.addEventListener('click', () => {
 function appendEditableRow(defaultPrice = null) {
     const r = createRow(null, defaultPrice);
     list.appendChild(r);
+ 
+    if (list.children.length === 1) {
+        const firstQty = r.querySelector('.qty-input');
+        if (firstQty) firstQty.placeholder = "Qty";
+
+        
+        firstQty.addEventListener('input', () => {
+            firstQty.placeholder = "";
+        });
+    }
 }
 
 function initUI() {
     completed = [];
     list.innerHTML = '';
-    appendEditableRow(predefined[0]); // First row default price
+    appendEditableRow(predefined[0]); 
     updateTotal();
 }
 
@@ -458,13 +545,13 @@ function resetAll() {
     initUI();
 }
 
-// CLOSE DROPDOWNS ON OUTSIDE CLICK
+
 document.addEventListener('click', () => {
     document.querySelectorAll('.drop-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.price-box').forEach(b => b.classList.remove('active'));
 });
 
-// INITIALIZE
+
 initUI();
 </script>
 
