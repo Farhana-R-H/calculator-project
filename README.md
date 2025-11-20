@@ -24,5 +24,3 @@ A responsive web-based calculator built with django backend and frontend using *
 
 ---
 
-## Project Structure
-
